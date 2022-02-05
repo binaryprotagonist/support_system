@@ -2,7 +2,8 @@
 namespace App\Http\Controllers;
   
 use Illuminate\Http\Request;
-   
+use Auth;
+use App\Models\Tickets;
 class HomeController extends Controller
 {
     /**
@@ -23,7 +24,8 @@ class HomeController extends Controller
     public function index()
 
     {
-        return view('client.dashboard');
+        $ticket = Tickets::where('client_id',Auth::user()->id)->count();
+        return view('client.dashboard',compact('ticket'));
     }
   
     /**
@@ -33,7 +35,8 @@ class HomeController extends Controller
      */
     public function support()
     {
-        return view('support.dashboard');
+        $ticket = Tickets::where('assigned_to',Auth::user()->id)->count();
+        return view('support.dashboard',compact('ticket'));
     }
     
 }

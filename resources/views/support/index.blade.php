@@ -42,7 +42,7 @@
                                                <td>{{$val->description}}</td>
                                                <td>{{$val->ticket_status->status }}</td>
                                                <td>{{ $val->ticket_client->name }}</td>
-                                               <td></td>
+                                               <td><a href="{{url('/support/ticket/'.$val->id)}}"><button type="button" class="btn btn-primary" >View</button></a></td>
                                                @php $i++; @endphp
                                             @endforeach
                                             </tr>

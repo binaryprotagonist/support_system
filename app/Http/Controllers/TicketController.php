@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Auth;
 use App\Models\TaskStatus;
 use App\Models\Tickets;
+use App\Models\TicketAttachments;
 use App\Models\User;
 
 class TicketController extends Controller
@@ -27,7 +28,7 @@ class TicketController extends Controller
      */
     public function index()
     {
-        $tickets = Tickets::with('ticket_status', 'ticket_assigned_to')->where('client_id',Auth::user()->id)->paginate(20);
+        $tickets = Tickets::with('ticket_status', 'ticket_assigned_to')->where('client_id',Auth::user()->id)->latest()->paginate(20);
         return view('client.index', compact('tickets'));
     }
 
@@ -56,8 +57,9 @@ class TicketController extends Controller
         $client_id = Auth::user()->id;
         $input['client_id'] = $client_id;
         $input['status'] = 1;
-        $input['assigned_to'] = 0;
-        Ticket::create($input);
+        //Randomly assign to any support user
+        $input['assigned_to'] = User::where('is_admin', 1)->inRandomOrder()->limit(1)->first()->id;
+        Tickets::create($input);
         return redirect()->route('client.ticket');
     }
 
@@ -69,7 +71,8 @@ class TicketController extends Controller
      */
     public function show($id)
     {
-        //
+        $ticket = Tickets::with('ticket_status', 'ticket_assigned_to','ticketAttachments')->find($id);
+        return view('client.detail', compact('ticket'));
     }
 
     /**
@@ -80,7 +83,10 @@ class TicketController extends Controller
      */
     public function edit($id)
     {
-        //
+        $ticket = Tickets::with('ticket_status', 'ticket_assigned_to','ticketAttachments')->find($id);
+        $status = TaskStatus::all();
+        $users = User::where('is_admin',1)->get();
+        return view('support.detail', compact('ticket','status','users'));
     }
 
     /**
@@ -92,19 +98,28 @@ class TicketController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $input = $request->validate([
+            'status' => 'required',
+            'assigned_to' => 'required',
+        ]);
+
+        Tickets::where('id', $id)
+            ->update($input);
+
+        $tmpFilePath = $_FILES['attachment']['tmp_name'];
+        if($tmpFilePath){
+               $file = time(). \Auth::user()->id.'.'.$request->file('attachment')->getClientOriginalExtension();
+                move_uploaded_file($tmpFilePath,public_path('ticket_attachments') . '/' . $file);
+                $fileOriginalName = $request->file('attachment')->getClientOriginalName();
+                $attach = new TicketAttachments;
+                $attach->ticket_id = $id;
+                $attach->attachment = $file;
+                $attach->save();
+            }
+
+        return redirect()->route('support.ticket.show',$id);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
     /**
      * Display a support tickets of the resource.
      *
@@ -112,7 +127,7 @@ class TicketController extends Controller
      */
     public function list()
     {
-        $tickets = Tickets::with('ticket_status', 'ticket_client')->where('assigned_to',Auth::user()->id)->paginate(20);
+        $tickets = Tickets::with('ticket_status', 'ticket_client')->where('assigned_to',Auth::user()->id)->latest()->paginate(20);
         return view('support.index', compact('tickets'));
     }
 

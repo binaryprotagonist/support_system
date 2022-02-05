@@ -26,6 +26,7 @@ Route::get('client/ticket', [App\Http\Controllers\TicketController::class, 'inde
 Route::get('client/ticket/new', [App\Http\Controllers\TicketController::class, 'create'])->name('client.ticket.add')->middleware('is_client');
 Route::post('client/ticket/new', [App\Http\Controllers\TicketController::class, 'store'])->name('client.ticket.store')->middleware('is_client');
 Route::get('client/ticket/{id?}', [App\Http\Controllers\TicketController::class, 'show'])->name('client.ticket.show')->middleware('is_client');
-Route::delete('client/ticket/{id?}', [App\Http\Controllers\TicketController::class, 'delete'])->name('client.ticket.delete')->middleware('is_client');
 
 Route::get('support/ticket',[App\Http\Controllers\TicketController::class, 'list'])->name('support.ticket')->middleware('is_admin');
+Route::get('support/ticket/{id?}',[App\Http\Controllers\TicketController::class, 'edit'])->name('support.ticket.show')->middleware('is_admin');
+Route::patch('support/ticket/{id?}',[App\Http\Controllers\TicketController::class, 'update'])->name('support.ticket.update')->middleware('is_admin');

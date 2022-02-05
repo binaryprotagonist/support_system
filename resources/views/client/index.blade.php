@@ -41,8 +41,8 @@
                                                <td>{{$val->title}}</td>
                                                <td>{{$val->description}}</td>
                                                <td>{{$val->ticket_status->status }}</td>
-                                                <td>{{ $val->ticket_assigned_to->name }}</td>
-                                               <td></td>
+                                                <td>@if($val->assigned_to!=0){{ $val->ticket_assigned_to->name }}@endif</td>
+                                               <td><a href="{{url('/client/ticket/'.$val->id)}}"><button type="button" class="btn btn-primary" >View</button></a></td>
                                                @php $i++; @endphp
                                             @endforeach
                                             </tr>
