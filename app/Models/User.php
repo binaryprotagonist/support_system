@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Tickets;
 
 class User extends Authenticatable
 {
@@ -42,4 +43,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function client_tickets(){
+        return $this->hasMany(Tickets::class,'client_id','id');
+    }
+
+    public function support_tickets(){
+        return $this->hasMany(Tickets::class,'assigned_to','id');
+    }
 }
